@@ -7,7 +7,6 @@ import { RegisterForm } from "./page/RegisterForm";
 export const RouterComponent: React.FC<any> = () => {
     return (
         <Routes>
-
             <Route index element={<RegisterForm />} />
             <Route path="dashboard" element={<DataGrid />} />
             <Route path="*" element={<Result

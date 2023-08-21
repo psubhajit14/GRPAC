@@ -1,71 +1,31 @@
 import React, { useState } from 'react';
-import { Button, Card, ConfigProvider, Layout, Menu, theme, Typography } from 'antd';
-import { Header, Content, Footer } from 'antd/es/layout/layout';
-import Sider from 'antd/es/layout/Sider';
-import { AiOutlineMenuFold, AiOutlineMenuUnfold, AiOutlineHome } from 'react-icons/ai'
-import { BsTable } from 'react-icons/bs';
-import { MdPayment } from 'react-icons/md';
+import { ConfigProvider, Layout, Space, Typography } from 'antd';
+import { Footer } from 'antd/es/layout/layout';
 import {
-  BrowserRouter,
-  Link,
+  BrowserRouter, Link,
 } from "react-router-dom";
-import { RouterComponent } from './routes';
+import { useViewport, ViewportProvider } from './util';
+import { Body, Head, Navigation } from './layout';
+import { DiCodeigniter } from 'react-icons/di'
 
 export const App: React.FC<any> = () => {
-  const [collapsed, setCollapsed] = useState(false);
-  const {
-    token: { colorBgContainer },
-  } = theme.useToken();
+
+  const { width } = useViewport();
+  const [collapsed, setCollapsed] = useState((width < 768));
 
   return (
     <ConfigProvider>
       <BrowserRouter>
-        <Layout>
-          <Sider collapsible collapsed={collapsed} style={{ padding: 0 }}>
-            <Typography.Title style={{ textAlign: 'center', fontSize: 24, color: 'white' }}>{collapsed ? null : "GRPAC"}</Typography.Title>
-            <Menu
-              theme='dark'
-              defaultValue={1}
-              items={[
-                {
-                  label: 'Home',
-                  icon: <Link to="/"><AiOutlineHome /></Link>,
-                  key: 1,
-                },
-                {
-                  label: 'Dashboard',
-                  icon: <Link to="/dashboard"> <BsTable /></Link>,
-                  key: 2,
-                },
-                {
-                  label: 'Payment Details',
-                  icon: <MdPayment />,
-                  key: 3
-                }
-              ]}>
-            </Menu>
-          </Sider>
+        <ViewportProvider>
           <Layout>
-            <Header style={{ padding: 0, background: colorBgContainer }}>
-              <Button
-                type="text"
-                icon={collapsed ? <AiOutlineMenuUnfold /> : <AiOutlineMenuFold />}
-                onClick={() => setCollapsed(!collapsed)}
-                style={{
-                  fontSize: '24px',
-                  width: 64,
-                  height: 64,
-                }}
-              />
-            </Header>
-            <Content style={{ margin: 16, width: '100%', height: '80vh' }}>
-              <Card style={{ marginRight: "36px" }}>
-                <RouterComponent />
-              </Card>
-            </Content>
-            <Footer>Footer</Footer>
+            <Navigation collapsed={collapsed} />
+            <Layout>
+              <Head collapsed={collapsed} setCollapsed={setCollapsed} />
+              <Body />
+              <Footer style={{ textAlign: 'center' }}><DiCodeigniter style={{ fontSize: 16 }} color='crimson' /> <Typography.Text>Developed by Subhajit Paul and ____________ ___________. <br /> Please visit <Link target="_blank" to="https://github.com/psubhajit14/GRPAC">here</Link> to know more.</Typography.Text></Footer>
+            </Layout>
           </Layout>
-        </Layout>
+        </ViewportProvider>
       </BrowserRouter>
     </ConfigProvider >
   )

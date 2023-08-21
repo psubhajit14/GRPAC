@@ -12,22 +12,20 @@ export const RegisterForm: React.FC<any> = () => {
     const [formInstance] = Form.useForm();
     const district = Form.useWatch("district", formInstance);
     const block = Form.useWatch("block", formInstance);
-    const { resetFields } = formInstance;
-
+    const { resetFields, } = formInstance;
     const [loading, setLoading] = useState(false)
 
     const handleSubmit = async (testdata: any) => {
-        const ref = collection(firestore, "test_data") // Firebase creates this automatically
-
+        const ref = collection(firestore, "test_data")
         let data = {
             ...testdata
         }
-
         try {
             setLoading(true);
             await addDoc(ref, data)
             setLoading(false)
             message.success("successfully data pushed to firebase");
+            resetFields()
         } catch (err) {
             console.log(err)
             setLoading(false)
@@ -41,6 +39,7 @@ export const RegisterForm: React.FC<any> = () => {
             labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}
             onFinish={(val) => handleSubmit(val)}
             form={formInstance}
+            scrollToFirstError
         >
             <Form.Item name='name' label="Name" rules={[
                 { required: true, message: 'Please input your username!' }

@@ -1,97 +1,106 @@
-import { Table } from "antd";
+import { Table, Tag } from "antd";
 import type { ColumnsType, TableProps } from 'antd/es/table';
+import { useCallback, useEffect, useState } from "react";
+
+import { getDocs, collection, getDocsFromCache } from "@firebase/firestore"
+import { firestore } from "../database/firebaseUtil";
+import * as Constants from "../data";
 
 export const DataGrid: React.FC<any> = () => {
 
 
     interface DataType {
-        key: React.Key;
         name: string;
-        age: number;
-        address: string;
+        email: string;
+        gender: string;
+        mobileNo: string;
+        occupation: string;
+        district: string;
+        block: string;
+        mouza: string;
+        pin: string;
     }
+    const [loading, setLoading] = useState(false);
+    const [data, setData] = useState<DataType[]>([]);
+
+    const getDBData = useCallback(async () => {
+        setLoading(true)
+        let snapshot: any;
+        try {
+            snapshot = await getDocs(collection(firestore, "test_data"));
+        }
+        catch (e) {
+            snapshot = await getDocsFromCache(collection(firestore, "test_data"));
+        }
+        if (!snapshot.empty)
+            setData(snapshot?.docs.map((item: any) => item.data()));
+        setLoading(false)
+    }, [])
+    useEffect(() => {
+        getDBData();
+    }, [getDBData])
+    console.log("data", data)
+
+
 
     const columns: ColumnsType<DataType> = [
         {
             title: 'Name',
             dataIndex: 'name',
-            filters: [
-                {
-                    text: 'Joe',
-                    value: 'Joe',
-                },
-                {
-                    text: 'Jim',
-                    value: 'Jim',
-                },
-                {
-                    text: 'Submenu',
-                    value: 'Submenu',
-                    children: [
-                        {
-                            text: 'Green',
-                            value: 'Green',
-                        },
-                        {
-                            text: 'Black',
-                            value: 'Black',
-                        },
-                    ],
-                },
-            ],
-            // specify the condition of filtering result
-            // here is that finding the name started with `value`
-            onFilter: (value: any, record) => record.name.indexOf(value) === 0,
-            sorter: (a, b) => a.name.length - b.name.length,
+            sorter: (a, b) => a.name.localeCompare(b.name),
             sortDirections: ['descend'],
+            fixed: "left"
         },
         {
-            title: 'Age',
-            dataIndex: 'age',
-            defaultSortOrder: 'descend',
-            sorter: (a, b) => a.age - b.age,
+            title: 'Email',
+            dataIndex: 'email',
+            sorter: (a, b) => a.name.localeCompare(b.name),
         },
         {
-            title: 'Address',
-            dataIndex: 'address',
-            filters: [
-                {
-                    text: 'London',
-                    value: 'London',
-                },
-                {
-                    text: 'New York',
-                    value: 'New York',
-                },
-            ],
-            onFilter: (value: any, record) => record.address.indexOf(value) === 0,
-        },
-    ];
-
-    const data = [
-        {
-            key: '1',
-            name: 'John Brown',
-            age: 32,
-            address: 'New York No. 1 Lake Park',
+            title: 'Gender',
+            dataIndex: 'gender',
+            render: (value, _, __) => {
+                return (
+                    <>{value === "male" && <Tag>Male</Tag>}{value === "female" && <Tag>Female</Tag>}</>
+                )
+            },
         },
         {
-            key: '2',
-            name: 'Jim Green',
-            age: 42,
-            address: 'London No. 1 Lake Park',
+            title: 'Contact No',
+            dataIndex: 'mobileNo',
+            render: (value, _, __) => {
+                return (
+                    <>+91-{value.substr(0, 3) + '-' + value.substr(3, 3) + '-' + value.substr(6, 4)}</>
+                )
+            }
         },
         {
-            key: '3',
-            name: 'Joe Black',
-            age: 32,
-            address: 'Sydney No. 1 Lake Park',
+            title: 'Occupation',
+            dataIndex: 'occupation',
+            render: (value, _, __) => {
+                return (
+                    <>{Constants.data.occupationList.find(item => item.value === value)?.label}</>
+                )
+            }
         },
         {
-            key: '4',
-            name: 'Jim Red',
-            age: 32,
-            address: 'London No. 2 Lake Park',
+            title: 'District',
+            dataIndex: 'district',
+            render: (value, _, __) => value.split("] ")[1]
+        },
+        {
+            title: 'Block',
+            dataIndex: 'block',
+            render: (value, _, __) => value.split("] ")[1]
+        },
+        {
+            title: 'Mouza',
+            dataIndex: 'mouza',
+            render: (value, _, __) => value?.split("] ")[1]
+        },
+        {
+            title: 'Pin Code',
+            dataIndex: 'pin',
         },
     ];
 
@@ -100,6 +109,6 @@ export const DataGrid: React.FC<any> = () => {
     };
 
     return (
-        <Table columns={columns} dataSource={data} onChange={onChange} />
+        <Table loading={loading} columns={columns} dataSource={data} onChange={onChange} pagination={{ pageSize: 5, hideOnSinglePage: true }} scroll={{ x: 1500, y: 600 }} />
     );
 }
